@@ -1,7 +1,7 @@
 const express = require("express"); // Import the express.js framework, used to create a server and manage routing
 const app = express(); // Create an Express application instance
 const cors = require("cors"); // Import the CORS middleware, which allows your server to handle cross-origin requests. Server updates changes without reboot
-const corsOptions = { origin: ["http://localhost:5173"] }; // Define CORS options, restricting access to your server from only this specific origin
+const corsOptions = { origin: ["https://daily-dracula-flow.vercel.app"] }; // Define CORS options, restricting access to your server from only this specific origin
 
 app.use(cors(corsOptions)); // Apply CORS middleware with the specified options to the Express app
 

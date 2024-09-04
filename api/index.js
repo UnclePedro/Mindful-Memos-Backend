@@ -6,7 +6,7 @@ const corsOptions = { origin: ["http://localhost:5173"] }; // Define CORS option
 app.use(cors(corsOptions)); // Apply CORS middleware with the specified options to the Express app
 
 // Define a route handler for GET requests made to the /quotes endpoint
-app.get("/randomQuote", (req, res) => {
+app.get("/", (req, res) => {
   // Array of quotes
   const quotesArray = [
     {

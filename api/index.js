@@ -6,7 +6,7 @@ const corsOptions = { origin: ["https://daily-dracula-flow.vercel.app"] }; // De
 app.use(cors(corsOptions)); // Apply CORS middleware with the specified options to the Express app
 
 // Define a route handler for GET requests made to the /quotes endpoint
-app.get("/", (req, res) => {
+app.get("/quotes", (req, res) => {
   // Array of quotes
   const quotesArray = [
     {

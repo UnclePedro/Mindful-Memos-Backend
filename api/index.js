@@ -705,7 +705,7 @@ app.get("/quote/:id", (req, res) => {
 
 // Route 3: Get the total number of quotes
 app.get("/quote/count", (req, res) => {
-  res.json({ totalQuotes: quotesArray.length });
+  res.json(quotesArray.length);
 });
 
 // Start the server and listen for incoming HTTP requests on port 8080

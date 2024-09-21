@@ -686,8 +686,8 @@ const getRandomQuote = () => {
   return quotesArray[randomIndex].quote;
 };
 
-// Define a route handler for GET requests made to the /quotes endpoint
-app.get("/", (req, res) => {
+// Define a route handler for GET requests made to the /randomquote endpoint
+app.get("/randomquote", (req, res) => {
   res.json(getRandomQuote());
 });
 

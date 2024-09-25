@@ -1,7 +1,10 @@
 const express = require("express"); // Import the express.js framework, used to create a server and manage routing
 const app = express(); // Create an Express application instance
 const cors = require("cors"); // Import the CORS middleware, which allows your server to handle cross-origin requests. Server updates changes without reboot
-const corsOptions = { origin: ["https://daily-dracula-flow.vercel.app"] }; // Define CORS options, restricting access to your server from only this specific origin
+const corsOptions = {
+  origin: ["https://daily-dracula-flow.vercel.app", "http://localhost:5173"],
+}; // Define CORS options, restricting access to your server from only this specific origin
+app.use(express.json()); // Middleware to parse JSON bodies
 
 app.use(cors(corsOptions)); // Apply CORS middleware with the specified options to the Express app
 
@@ -680,11 +683,22 @@ const quotesArray = [
   },
 ];
 
+const newQuotes = [];
+
 // Select random quote from array
 const getRandomQuote = () => {
   const randomIndex = Math.floor(Math.random() * quotesArray.length);
   return quotesArray[randomIndex].quote;
 };
+
+app.post("/quotes", (req, res) => {
+  const newQuote = req.body.quote;
+
+  // Send a success response back to the frontend
+  res
+    .status(201)
+    .json({ message: "Quote added successfully", quote: newQuote });
+});
 
 // Define a route handler for GET requests made to the /randomquote endpoint
 app.get("/randomquote", (req, res) => {
@@ -704,8 +718,13 @@ app.get("/quote/:id", (req, res) => {
 });
 
 // Route 3: Get the total number of quotes
-app.get("/quote/count", (req, res) => {
+app.get("/total", (req, res) => {
   res.json(quotesArray.length);
+});
+
+// Route 4: Get new quotes user has added
+app.get("/quotes", (req, res) => {
+  res.json(newQuotes);
 });
 
 // Start the server and listen for incoming HTTP requests on port 8080

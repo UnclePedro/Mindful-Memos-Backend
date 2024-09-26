@@ -12,6 +12,21 @@ const corsOptions = {
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(cors(corsOptions)); // Apply CORS middleware with the specified options to the Express app
 
+// Prisma
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
+
+async function addQuoteSql(quote: string) {
+  await prisma.quote.create({
+    data: {
+      quote,
+    },
+  });
+
+  const allQuotes = await prisma.quote.findMany();
+  console.log(allQuotes);
+}
+
 const quotesArray = [
   {
     quote: "We really out here.",
@@ -37,7 +52,7 @@ const quotesArray = [
   },
 ];
 
-const userQuotes: [] = [];
+const userQuotes: string[] = [];
 
 // Select random quote from array
 const getRandomQuote = () => {
@@ -69,14 +84,11 @@ app.get("/total", (req: Request, res: Response) => {
 
 // Post request to add new data to the server memory
 app.post("/quotes", (req: Request, res: Response) => {
-  console.log(req.body.quote);
-  const newQuote = req.body.quote;
-  // userQuotes.push(newQuote);
-
-  // Send a success response back to the frontend
+  userQuotes.push(req.body.quote);
+  addQuoteSql(req.body.quote);
   res
     .status(201)
-    .json({ message: "Quote added successfully", quote: newQuote });
+    .json({ message: "Quote added successfully", quote: req.body.quote });
 });
 
 // Route 4: Get new quotes user has added

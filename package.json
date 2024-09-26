@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@prisma/client": "^5.20.0",
     "@types/axios": "^0.14.0",
     "@types/morgan": "^1.9.9",
     "axios": "^1.7.7",

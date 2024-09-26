@@ -8,8 +8,8 @@ const corsOptions = {
     "https://random-quote-generator-api.vercel.app",
   ],
 }; // Define CORS options, restricting access to your server from only this specific origin
-app.use(express.json()); // Middleware to parse JSON bodies
 
+app.use(express.json()); // Middleware to parse JSON bodies
 app.use(cors(corsOptions)); // Apply CORS middleware with the specified options to the Express app
 
 const quotesArray = [
@@ -687,22 +687,13 @@ const quotesArray = [
   },
 ];
 
-const newQuotes = [];
+const userQuotes = [];
 
 // Select random quote from array
 const getRandomQuote = () => {
   const randomIndex = Math.floor(Math.random() * quotesArray.length);
   return quotesArray[randomIndex].quote;
 };
-
-app.post("/quotes", (req, res) => {
-  const newQuote = req.body.quote;
-
-  // Send a success response back to the frontend
-  res
-    .status(201)
-    .json({ message: "Quote added successfully", quote: newQuote });
-});
 
 // Define a route handler for GET requests made to the /randomquote endpoint
 app.get("/randomquote", (req, res) => {
@@ -726,9 +717,22 @@ app.get("/total", (req, res) => {
   res.json(quotesArray.length);
 });
 
+// Post request to add new data to the server memory
+app.post("/quotes", (req, res) => {
+  const newQuote = req.body.quote;
+  userQuotes.push(newQuote);
+
+  // Send a success response back to the frontend
+  res
+    .status(201)
+    .json({ message: "Quote added successfully", quote: newQuote });
+});
+
 // Route 4: Get new quotes user has added
 app.get("/quotes", (req, res) => {
-  res.json(newQuotes);
+  console.log("Get quotes triggered");
+  res.json(userQuotes);
+  console.log(`User quotes: ${userQuotes}`);
 });
 
 // Start the server and listen for incoming HTTP requests on port 8080

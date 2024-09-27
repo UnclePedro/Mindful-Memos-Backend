@@ -12,25 +12,7 @@ const corsOptions = {
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(cors(corsOptions)); // Apply CORS middleware with the specified options to the Express app
 
-// Prisma
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
-
-async function addDatabaseQuote(quote: string) {
-  await prisma.quote.create({
-    data: {
-      quote,
-    },
-  });
-}
-
-async function getDatabaseQuotes() {
-  const allQuotes = await prisma.quote.findMany();
-  console.log(allQuotes);
-  return allQuotes;
-}
-
-const quotesArray = [
+const draculaQuotes = [
   {
     quote: "We really out here.",
   },
@@ -55,12 +37,36 @@ const quotesArray = [
   },
 ];
 
-const userQuotes: string[] = [];
+// Prisma
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
+
+async function getDatabaseQuotes() {
+  const allQuotes = await prisma.quote.findMany();
+  return allQuotes;
+}
+
+async function addDatabaseQuote(quote: string) {
+  await prisma.quote.create({
+    data: {
+      quote,
+    },
+  });
+}
+
+async function deleteDatabaseQuote(quoteId: number) {
+  // Delete the quote where the id matches the provided quoteId
+  await prisma.quote.delete({
+    where: {
+      id: quoteId,
+    },
+  });
+}
 
 // Select random quote from array
 const getRandomQuote = () => {
-  const randomIndex = Math.floor(Math.random() * quotesArray.length);
-  return quotesArray[randomIndex].quote;
+  const randomIndex = Math.floor(Math.random() * draculaQuotes.length);
+  return draculaQuotes[randomIndex].quote;
 };
 
 // Define a route handler for GET requests made to the /randomquote endpoint
@@ -73,8 +79,8 @@ app.get("/quote/:id", (req: Request, res: Response) => {
   const id = parseInt(req.params.id);
 
   // Validate that the index is within range
-  if (id >= 0 && id < quotesArray.length) {
-    res.json(quotesArray[id].quote);
+  if (id >= 0 && id < draculaQuotes.length) {
+    res.json(draculaQuotes[id].quote);
   } else {
     res.status(404).json({ error: "Quote not found" });
   }
@@ -82,21 +88,34 @@ app.get("/quote/:id", (req: Request, res: Response) => {
 
 // Route 3: Get the total number of quotes
 app.get("/total", (req: Request, res: Response) => {
-  res.json(quotesArray.length);
+  res.json(draculaQuotes.length);
 });
 
 // Post request to add new data to the server memory
 app.post("/quotes", (req: Request, res: Response) => {
-  userQuotes.push(req.body.quote);
   addDatabaseQuote(req.body.quote);
   res
     .status(201)
     .json({ message: "Quote added successfully", quote: req.body.quote });
 });
 
+// Post request to add new data to the server memory
+app.delete("/deleteQuote", async (req: Request, res: Response) => {
+  // Perform deletion of the quote
+  await deleteDatabaseQuote(req.body.id);
+
+  // Fetch the updated list of quotes after deletion
+  const updatedQuotes = await getDatabaseQuotes();
+
+  // Return the updated list of quotes to the client
+  res.status(200).json({
+    message: "Quote deleted successfully",
+    quotes: updatedQuotes, // Send the updated quotes back to the client
+  });
+});
+
 // Route 4: Get new quotes user has added
 app.get("/quotes", async (req: Request, res: Response) => {
-  console.log("Get quotes triggered");
   const allDatabaseQuotes = await getDatabaseQuotes();
   res.json(allDatabaseQuotes);
 });

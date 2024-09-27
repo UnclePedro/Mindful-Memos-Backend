@@ -16,15 +16,18 @@ app.use(cors(corsOptions)); // Apply CORS middleware with the specified options 
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
-async function addQuoteSql(quote: string) {
+async function addDatabaseQuote(quote: string) {
   await prisma.quote.create({
     data: {
       quote,
     },
   });
+}
 
+async function getDatabaseQuotes() {
   const allQuotes = await prisma.quote.findMany();
   console.log(allQuotes);
+  return allQuotes;
 }
 
 const quotesArray = [
@@ -85,17 +88,17 @@ app.get("/total", (req: Request, res: Response) => {
 // Post request to add new data to the server memory
 app.post("/quotes", (req: Request, res: Response) => {
   userQuotes.push(req.body.quote);
-  addQuoteSql(req.body.quote);
+  addDatabaseQuote(req.body.quote);
   res
     .status(201)
     .json({ message: "Quote added successfully", quote: req.body.quote });
 });
 
 // Route 4: Get new quotes user has added
-app.get("/quotes", (req: Request, res: Response) => {
+app.get("/quotes", async (req: Request, res: Response) => {
   console.log("Get quotes triggered");
-  res.json(userQuotes);
-  console.log(`User quotes: ${userQuotes}`);
+  const allDatabaseQuotes = await getDatabaseQuotes();
+  res.json(allDatabaseQuotes);
 });
 
 // Start the server and listen for incoming HTTP requests on port 8080

@@ -12,28 +12,151 @@ const corsOptions = {
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(cors(corsOptions)); // Apply CORS middleware with the specified options to the Express app
 
-const draculaQuotes = [
+const inspirationalQuotes = [
   {
-    quote: "We really out here.",
+    quote: "A comfort zone is a beautiful place, but nothing ever grows there.",
+    author: "John Assaraf",
   },
   {
     quote:
-      "Smoking on Congolese dickwick. Looking for a signal. I went dark a long time ago.",
+      "It's only after you've stepped out of your comfort zone that you begin to change, grow, and transform.",
+    author: "Roy T. Bennett",
   },
   {
-    quote: "Real premium French scatatouille. Money longer than KD's feet.",
+    quote: "Believe you can and you're halfway there.",
+    author: "Theodore Roosevelt",
+  },
+  {
+    quote: "Act as if what you do makes a difference. It does.",
+    author: "William James",
+  },
+  {
+    quote: "Do what you can, with what you have, where you are.",
+    author: "Theodore Roosevelt",
   },
   {
     quote:
-      "This shit ain't nothing to me man. I fuck like it's for survival. As if it's the last sip of water I'll ever get.",
+      "Success is not final, failure is not fatal: It is the courage to continue that counts.",
+    author: "Winston Churchill",
   },
   {
     quote:
-      "I'm so violent and sick in the head. I can't tell if I want to kill my opps or fuck em.",
+      "What lies behind us and what lies before us are tiny matters compared to what lies within us.",
+    author: "Ralph Waldo Emerson",
+  },
+  {
+    quote: "Don’t watch the clock; do what it does. Keep going.",
+    author: "Sam Levenson",
+  },
+  {
+    quote: "Your time is limited, don’t waste it living someone else’s life.",
+    author: "Steve Jobs",
+  },
+  {
+    quote: "Start where you are. Use what you have. Do what you can.",
+    author: "Arthur Ashe",
+  },
+  {
+    quote: "The only impossible journey is the one you never begin.",
+    author: "Tony Robbins",
+  },
+  { quote: "What we think, we become.", author: "Buddha" },
+  {
+    quote: "If opportunity doesn’t knock, build a door.",
+    author: "Milton Berle",
+  },
+  {
+    quote: "Strive not to be a success, but rather to be of value.",
+    author: "Albert Einstein",
+  },
+  {
+    quote: "You are never too old to set another goal or to dream a new dream.",
+    author: "C.S. Lewis",
+  },
+  {
+    quote: "The journey of a thousand miles begins with one step.",
+    author: "Lao Tzu",
+  },
+  {
+    quote: "Don't wait. The time will never be just right.",
+    author: "Napoleon Hill",
+  },
+  {
+    quote: "Believe and act as if it were impossible to fail.",
+    author: "Charles Kettering",
   },
   {
     quote:
-      "Zazah got me feeling like everything gonna be alright. Got the registered god particle on my hip.",
+      "Failure will never overtake me if my determination to succeed is strong enough.",
+    author: "Og Mandino",
+  },
+  { quote: "We become what we think about.", author: "Earl Nightingale" },
+  {
+    quote: "It always seems impossible until it’s done.",
+    author: "Nelson Mandela",
+  },
+  {
+    quote: "Life is 10% what happens to us and 90% how we react to it.",
+    author: "Charles R. Swindoll",
+  },
+  {
+    quote: "With the new day comes new strength and new thoughts.",
+    author: "Eleanor Roosevelt",
+  },
+  {
+    quote: "The power of imagination makes us infinite.",
+    author: "John Muir",
+  },
+  {
+    quote: "Action is the foundational key to all success.",
+    author: "Pablo Picasso",
+  },
+  {
+    quote:
+      "The only way to achieve the impossible is to believe it is possible.",
+    author: "Charles Kingsleigh",
+  },
+  { quote: "The best way out is always through.", author: "Robert Frost" },
+  {
+    quote: "Success is not in what you have, but who you are.",
+    author: "Bo Bennett",
+  },
+  {
+    quote: "Your life does not get better by chance, it gets better by change.",
+    author: "Jim Rohn",
+  },
+  {
+    quote: "Small deeds done are better than great deeds planned.",
+    author: "Peter Marshall",
+  },
+  {
+    quote: "Great things never came from comfort zones.",
+    author: "Ben Francia",
+  },
+  {
+    quote: "It does not matter how slowly you go as long as you do not stop.",
+    author: "Confucius",
+  },
+  {
+    quote: "Take it to send-town.",
+    author: "Harry Armitage Bath",
+    source: "Harry",
+  },
+  {
+    quote: "It's a hundred million degrees right now!",
+    author: "Adam Ondra",
+    source: "unknown YouTube video",
+  },
+  {
+    quote: "You can't look at a problem, you've gotta look through a problem.",
+    author: "Bugzy Malone",
+    source: "Movin'",
+  },
+  {
+    quote:
+      "I'm tellin' my bro don't quit. Put in the work and your time will come.",
+    author: "Central Cee",
+    source: "Tension",
   },
 ];
 
@@ -65,30 +188,13 @@ async function deleteDatabaseQuote(quoteId: number) {
 
 // Select random quote from array
 const getRandomQuote = () => {
-  const randomIndex = Math.floor(Math.random() * draculaQuotes.length);
-  return draculaQuotes[randomIndex].quote;
+  const randomIndex = Math.floor(Math.random() * inspirationalQuotes.length);
+  return inspirationalQuotes[randomIndex];
 };
 
 // Define a route handler for GET requests made to the /randomquote endpoint
 app.get("/randomquote", (req: Request, res: Response) => {
   res.json(getRandomQuote());
-});
-
-// Route 2: Get a quote by index
-app.get("/quote/:id", (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
-
-  // Validate that the index is within range
-  if (id >= 0 && id < draculaQuotes.length) {
-    res.json(draculaQuotes[id].quote);
-  } else {
-    res.status(404).json({ error: "Quote not found" });
-  }
-});
-
-// Route 3: Get the total number of quotes
-app.get("/total", (req: Request, res: Response) => {
-  res.json(draculaQuotes.length);
 });
 
 // Post request to add new data to the server memory
@@ -124,5 +230,3 @@ app.get("/quotes", async (req: Request, res: Response) => {
 app.listen(8080, () => {
   console.log("Server is running on http://localhost:8080");
 });
-
-// This is a crucial part of any Express application, as it actually puts the server in a state where it can start handling incoming requests.

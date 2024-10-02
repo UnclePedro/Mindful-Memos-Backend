@@ -6,6 +6,7 @@ const corsOptions = {
     "https://daily-dracula-flow.vercel.app",
     "http://localhost:5173",
     "https://random-quote-generator-api.vercel.app",
+    "https://mindful-memos.peterforsyth.dev",
   ],
 }; // Define CORS options, restricting access to your server from only this specific origin
 app.use(express.json()); // Middleware to parse JSON bodies

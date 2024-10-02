@@ -3,7 +3,6 @@ const app = express(); // Create an Express application instance
 import cors from "cors"; // Import the CORS middleware, which allows your server to handle cross-origin requests. Server updates changes without reboot
 const corsOptions = {
   origin: [
-    "https://daily-dracula-flow.vercel.app",
     "http://localhost:5173",
     "https://random-quote-generator-api.vercel.app",
     "https://mindful-memos.peterforsyth.dev",
@@ -91,5 +90,5 @@ app.get("/quotes", async (req: Request, res: Response) => {
 });
 
 app.listen(8080, () => {
-  console.log("Server is running on http://localhost:8080");
+  console.log("Server is running.");
 });

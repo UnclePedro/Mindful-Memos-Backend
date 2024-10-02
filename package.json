@@ -6,7 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "ts-node api/index",
     "dev": "nodemon api/index.ts",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "vercel-build": "prisma generate && prisma migrate deploy"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,7 @@
     "@prisma/client": "^5.20.0",
     "@types/axios": "^0.14.0",
     "@types/morgan": "^1.9.9",
+    "@vercel/postgres": "^0.10.0",
     "axios": "^1.7.7",
     "cors": "^2.8.5",
     "express": "^4.21.0",

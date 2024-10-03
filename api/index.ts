@@ -16,13 +16,15 @@ const prisma = new PrismaClient();
 async function addQuote(
   quote: string,
   author: string,
+  userId: string,
   isUserQuote: boolean = true
 ) {
   await prisma.quote.create({
     data: {
       quote,
       author,
-      isUserQuote, // Explicitly set whether the quote is a user quote or not
+      userId,
+      isUserQuote,
     },
   });
 }
@@ -37,7 +39,7 @@ async function addQuote(
 async function deleteQuote(quoteId: number) {
   await prisma.quote.delete({
     where: {
-      id: quoteId,
+      quoteId: quoteId,
     },
   });
 }
@@ -57,22 +59,30 @@ const getRandomQuote = async () => {
 };
 
 // Define a route handler for GET requests made to the /randomquote endpoint
-app.get("/randomquote", async (req: Request, res: Response) => {
+app.get("/randomQuote", async (req: Request, res: Response) => {
   res.json(await getRandomQuote());
 });
 
+// Get new quotes user has added
+app.get("/getUserQuotes", async (req: Request, res: Response) => {
+  res.json(await getUserQuotes());
+});
+
 // Add new quote to database
-app.post("/quotes", (req: Request, res: Response) => {
-  addQuote(req.body.quote, req.body.author);
+app.post("/addQuote", async (req: Request, res: Response) => {
+  addQuote(req.body.quote, req.body.author, req.body.userId);
+
+  const updatedUserQuotes = await getUserQuotes();
+
   res
     .status(201)
-    .json({ message: "Quote added successfully", quote: req.body.quote });
+    .json({ message: "Quote added successfully", quotes: updatedUserQuotes });
 });
 
 // Delete quote from database
 app.delete("/deleteQuote", async (req: Request, res: Response) => {
   // Perform deletion of the quote
-  await deleteQuote(req.body.id);
+  await deleteQuote(req.body.quoteId);
 
   // Fetch the updated list of quotes after deletion
   const updatedUserQuotes = await getUserQuotes();
@@ -82,11 +92,6 @@ app.delete("/deleteQuote", async (req: Request, res: Response) => {
     message: "Quote deleted successfully",
     quotes: updatedUserQuotes, // Send the updated quotes back to the client
   });
-});
-
-// Get new quotes user has added
-app.get("/quotes", async (req: Request, res: Response) => {
-  res.json(await getUserQuotes());
 });
 
 app.listen(8080, () => {

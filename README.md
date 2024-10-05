@@ -2,7 +2,7 @@
 
 A custom backend solution for my Mindful Memos app. Custom API's that query a PostgreSQL database with the help of Prisma.
 
-- ## Developed Using
+## Developed Using
 - [TypeScript](https://www.typescriptlang.org/)
 - [Node.js](https://nodejs.org/en)
 - [Express.js](https://expressjs.com/)

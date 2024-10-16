@@ -24,3 +24,8 @@ model Quote {
   quoteId         Int       @id @default(autoincrement())
   userId          String    @default("unknown")
 }
+
+model User {
+  username        String
+  apiKey          String    @id
+}

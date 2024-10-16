@@ -75,7 +75,7 @@ app.post("/addQuote", async (req: Request, res: Response) => {
 async function deleteQuote(quoteId: number) {
   await prisma.quote.delete({
     where: {
-      quoteId: quoteId,
+      id: quoteId,
     },
   });
 }
@@ -131,4 +131,5 @@ app.post("/generateUser", async (req: Request, res: Response) => {
 
 app.listen(8080, () => {
   console.log("Server is running.");
+  console.log("Database URL:", process.env.POSTGRES_PRISMA_URL);
 });

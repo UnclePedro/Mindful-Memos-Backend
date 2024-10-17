@@ -44,18 +44,17 @@ async function getUserQuotes() {
 app.get("/getUserQuotes", async (req: Request, res: Response) => {
   res.json(await getUserQuotes());
 });
-
 async function addQuote(
   quote: string,
   author: string,
-  userId: string,
+  authorId: number, // (foreign key to User)
   isUserQuote: boolean = true
 ) {
   await prisma.quote.create({
     data: {
       quote,
       author,
-      userId,
+      authorId,
       isUserQuote,
     },
   });
@@ -63,7 +62,7 @@ async function addQuote(
 
 // Add new quote to database
 app.post("/addQuote", async (req: Request, res: Response) => {
-  addQuote(req.body.quote, req.body.author, req.body.userId);
+  addQuote(req.body.quote, req.body.author, req.body.authorId);
 
   const updatedUserQuotes = await getUserQuotes();
 
@@ -96,19 +95,17 @@ app.delete("/deleteQuote", async (req: Request, res: Response) => {
 });
 
 interface User {
-  username: string;
+  id: number;
   apiKey: string;
 }
 
 // Function to create a new user with random username and API key
 const newUser = async () => {
-  const username = crypto.randomBytes(8).toString("hex");
   const apiKey = crypto.randomBytes(32).toString("hex");
 
   // Store the user with the username and API key in the database
   const newUser: User = await prisma.user.create({
     data: {
-      username,
       apiKey,
     },
   });

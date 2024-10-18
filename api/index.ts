@@ -44,31 +44,48 @@ async function getUserQuotes() {
 app.get("/getUserQuotes", async (req: Request, res: Response) => {
   res.json(await getUserQuotes());
 });
+
 async function addQuote(
   quote: string,
   author: string,
-  authorId: number, // (foreign key to User)
+  authorId: number,
   isUserQuote: boolean = true
 ) {
   await prisma.quote.create({
     data: {
       quote,
       author,
-      authorId,
       isUserQuote,
+      user: {
+        connect: { id: authorId }, // Connect the quote to the user using their ID
+      },
     },
   });
 }
 
-// Add new quote to database
-app.post("/addQuote", async (req: Request, res: Response) => {
-  addQuote(req.body.quote, req.body.author, req.body.authorId);
+// The /addQuote POST route handler
+app.post("/addQuote", async (req, res) => {
+  const { quote, author, apiKey } = req.body;
 
-  const updatedUserQuotes = await getUserQuotes();
+  try {
+    // Fetch the user based on the provided apiKey
+    const user = await prisma.user.findUnique({
+      where: { apiKey },
+    });
 
-  res
-    .status(201)
-    .json({ message: "Quote added successfully", quotes: updatedUserQuotes });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Call the addQuote function, passing the necessary parameters
+    const newQuote = await addQuote(quote, author, user.id);
+
+    // Respond with the new quote if successful
+    res.status(200).json({ newQuote });
+  } catch (error) {
+    console.error("Error creating quote:", error);
+    res.status(500).json({ error: "Failed to add quote" });
+  }
 });
 
 async function deleteQuote(quoteId: number) {
@@ -119,10 +136,10 @@ app.post("/generateUser", async (req: Request, res: Response) => {
     const newUserData: User = await newUser(); // Create a new user with an API key
     res.status(201).json({
       message: "User created successfully",
-      newUserData: newUserData,
+      newUser: newUserData,
     });
   } catch (error) {
-    res.status(500).json({ error: "Failed to create user" });
+    res.status(500).json({ error: "Failed to create user: backend" });
   }
 });
 

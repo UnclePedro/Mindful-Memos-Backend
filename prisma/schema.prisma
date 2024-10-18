@@ -19,7 +19,7 @@ datasource db {
 
 model User {
   id              Int       @id @default(autoincrement())
-  apiKey          String
+  apiKey          String    @unique
   Quote           Quote[]
 }
 

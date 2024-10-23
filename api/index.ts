@@ -14,13 +14,6 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 import crypto from "crypto";
 
-// async function loadInspirationalQuotes() {
-//   for (const { quote, author } of inspirationalQuotes) {
-//     await addQuote(quote, author, "", false); // Set isUserQuote to false for predefined quotes
-//   }
-//   console.log("Inspirational quotes loaded successfully!");
-// }
-
 const getRandomQuote = async () => {
   const allQuotes = await prisma.quote.findMany();
   const randomIndex = Math.floor(Math.random() * allQuotes.length);
@@ -131,18 +124,15 @@ interface User {
   apiKey: string;
 }
 
-// Function to create a new user with random username and API key
 const newUser = async () => {
-  const apiKey = crypto.randomBytes(32).toString("hex");
+  const apiKey = crypto.randomBytes(5).toString("hex");
 
-  // Store the user with the username and API key in the database
   const newUser: User = await prisma.user.create({
     data: {
       apiKey,
     },
   });
 
-  // Return the API key (and username, if needed) to the caller
   return newUser;
 };
 
@@ -157,6 +147,24 @@ app.post("/generateUser", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to create user: backend" });
   }
 });
+
+// async function loadQuotes(quotes: []) {
+//   for (const { quote, author } of quotes) {
+//     await addQuote(quote, author, 1, false); // Set isUserQuote to false for predefined quotes
+//   }
+//   console.log("Inspirational quotes loaded successfully!");
+// }
+
+// // Function to delete all quotes from the database
+// async function deleteAllQuotes() {
+//   try {
+//     // Delete all quotes
+//     const deletedQuotes = await prisma.quote.deleteMany({});
+//     console.log(`Deleted ${deletedQuotes.count} quotes from the database.`);
+//   } catch (error) {
+//     console.error("Error deleting quotes:", error);
+//   }
+// }
 
 app.listen(8080, () => {
   console.log("Server is running.");

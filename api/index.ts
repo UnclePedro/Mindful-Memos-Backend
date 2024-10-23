@@ -12,45 +12,14 @@ app.use(express.json()); // Middleware to parse JSON bodies
 app.use(cors(corsOptions)); // Apply CORS middleware with the specified options to the Express app
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
-
-async function addQuote(
-  quote: string,
-  author: string,
-  userId: string,
-  isUserQuote: boolean = true
-) {
-  await prisma.quote.create({
-    data: {
-      quote,
-      author,
-      userId,
-      isUserQuote,
-    },
-  });
-}
+import crypto from "crypto";
 
 // async function loadInspirationalQuotes() {
 //   for (const { quote, author } of inspirationalQuotes) {
-//     await addQuote(quote, author, false); // Set isUserQuote to false for predefined quotes
+//     await addQuote(quote, author, "", false); // Set isUserQuote to false for predefined quotes
 //   }
 //   console.log("Inspirational quotes loaded successfully!");
 // }
-
-async function deleteQuote(quoteId: number) {
-  await prisma.quote.delete({
-    where: {
-      quoteId: quoteId,
-    },
-  });
-}
-
-async function getUserQuotes() {
-  return await prisma.quote.findMany({
-    where: {
-      isUserQuote: true,
-    },
-  });
-}
 
 const getRandomQuote = async () => {
   const allQuotes = await prisma.quote.findMany();
@@ -63,37 +32,133 @@ app.get("/randomQuote", async (req: Request, res: Response) => {
   res.json(await getRandomQuote());
 });
 
+async function getUserQuotes() {
+  return await prisma.quote.findMany({
+    where: {
+      isUserQuote: true,
+    },
+  });
+}
+
 // Get new quotes user has added
 app.get("/getUserQuotes", async (req: Request, res: Response) => {
   res.json(await getUserQuotes());
 });
 
-// Add new quote to database
-app.post("/addQuote", async (req: Request, res: Response) => {
-  addQuote(req.body.quote, req.body.author, req.body.userId);
+async function addQuote(
+  quote: string,
+  author: string,
+  authorId: number,
+  isUserQuote: boolean = true
+) {
+  await prisma.quote.create({
+    data: {
+      quote,
+      author,
+      isUserQuote,
+      user: {
+        connect: { id: authorId }, // Connect the quote to the user using their ID
+      },
+    },
+  });
+}
 
-  const updatedUserQuotes = await getUserQuotes();
+app.post("/addQuote", async (req, res) => {
+  const { quote, author, apiKey } = req.body;
 
-  res
-    .status(201)
-    .json({ message: "Quote added successfully", quotes: updatedUserQuotes });
+  try {
+    // Fetch the user based on the provided apiKey
+    const user = await prisma.user.findUnique({
+      where: { apiKey },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const newQuote = await addQuote(quote, author, user.id);
+    res.status(200).json({ newQuote });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to add quote" });
+  }
 });
+async function deleteQuote(quoteId: number, apiKey: string) {
+  // Retrieve the quote to check the associated authorId
+  const quote = await prisma.quote.findUnique({
+    where: { id: quoteId },
+    select: { authorId: true }, // Select the authorId based on the quoteId
+  });
 
-// Delete quote from database
+  // If the quote doesn't exist, throw an error
+  if (!quote) {
+    throw new Error("Quote not found");
+  }
+
+  // Retrieve the user to check the apiKey
+  const user = await prisma.user.findUnique({
+    where: { id: quote.authorId },
+    select: { apiKey: true },
+  });
+
+  // If the user doesn't exist or the apiKey does not match, throw an error
+  if (!user) {
+    throw new Error("User not found");
+  }
+  if (user.apiKey !== apiKey) {
+    throw new Error("Unauthorized: API key does not match");
+  }
+
+  // Proceed with deletion if the apiKey matches
+  await prisma.quote.delete({
+    where: {
+      id: quoteId,
+    },
+  });
+}
+
 app.delete("/deleteQuote", async (req: Request, res: Response) => {
-  // Perform deletion of the quote
-  await deleteQuote(req.body.quoteId);
-
-  // Fetch the updated list of quotes after deletion
+  await deleteQuote(req.body.id, req.body.apiKey);
   const updatedUserQuotes = await getUserQuotes();
 
-  // Return the updated list of quotes to the client
   res.status(200).json({
     message: "Quote deleted successfully",
-    quotes: updatedUserQuotes, // Send the updated quotes back to the client
+    quotes: updatedUserQuotes,
   });
+});
+
+interface User {
+  id: number;
+  apiKey: string;
+}
+
+// Function to create a new user with random username and API key
+const newUser = async () => {
+  const apiKey = crypto.randomBytes(32).toString("hex");
+
+  // Store the user with the username and API key in the database
+  const newUser: User = await prisma.user.create({
+    data: {
+      apiKey,
+    },
+  });
+
+  // Return the API key (and username, if needed) to the caller
+  return newUser;
+};
+
+app.post("/generateUser", async (req: Request, res: Response) => {
+  try {
+    const newUserData: User = await newUser(); // Create a new user with an API key
+    res.status(201).json({
+      message: "User created successfully",
+      newUser: newUserData,
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to create user: backend" });
+  }
 });
 
 app.listen(8080, () => {
   console.log("Server is running.");
+  console.log("Database URL:", process.env.POSTGRES_PRISMA_URL);
 });

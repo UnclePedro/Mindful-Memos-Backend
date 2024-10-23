@@ -63,7 +63,6 @@ async function addQuote(
   });
 }
 
-// The /addQuote POST route handler
 app.post("/addQuote", async (req, res) => {
   const { quote, author, apiKey } = req.body;
 
@@ -77,18 +76,39 @@ app.post("/addQuote", async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Call the addQuote function, passing the necessary parameters
     const newQuote = await addQuote(quote, author, user.id);
-
-    // Respond with the new quote if successful
     res.status(200).json({ newQuote });
   } catch (error) {
-    console.error("Error creating quote:", error);
     res.status(500).json({ error: "Failed to add quote" });
   }
 });
+async function deleteQuote(quoteId: number, apiKey: string) {
+  // Retrieve the quote to check the associated authorId
+  const quote = await prisma.quote.findUnique({
+    where: { id: quoteId },
+    select: { authorId: true }, // Select the authorId based on the quoteId
+  });
 
-async function deleteQuote(quoteId: number) {
+  // If the quote doesn't exist, throw an error
+  if (!quote) {
+    throw new Error("Quote not found");
+  }
+
+  // Retrieve the user to check the apiKey
+  const user = await prisma.user.findUnique({
+    where: { id: quote.authorId },
+    select: { apiKey: true },
+  });
+
+  // If the user doesn't exist or the apiKey does not match, throw an error
+  if (!user) {
+    throw new Error("User not found");
+  }
+  if (user.apiKey !== apiKey) {
+    throw new Error("Unauthorized: API key does not match");
+  }
+
+  // Proceed with deletion if the apiKey matches
   await prisma.quote.delete({
     where: {
       id: quoteId,
@@ -96,18 +116,13 @@ async function deleteQuote(quoteId: number) {
   });
 }
 
-// Delete quote from database
 app.delete("/deleteQuote", async (req: Request, res: Response) => {
-  // Perform deletion of the quote
-  await deleteQuote(req.body.quoteId);
-
-  // Fetch the updated list of quotes after deletion
+  await deleteQuote(req.body.id, req.body.apiKey);
   const updatedUserQuotes = await getUserQuotes();
 
-  // Return the updated list of quotes to the client
   res.status(200).json({
     message: "Quote deleted successfully",
-    quotes: updatedUserQuotes, // Send the updated quotes back to the client
+    quotes: updatedUserQuotes,
   });
 });
 

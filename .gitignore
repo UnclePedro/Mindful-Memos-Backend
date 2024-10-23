@@ -4,5 +4,6 @@
 .env.development
 .env.local
 .env.production
+.env.dev
 .vercel
 

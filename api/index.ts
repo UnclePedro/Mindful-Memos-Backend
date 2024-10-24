@@ -57,7 +57,7 @@ async function addQuote(
 }
 
 app.post("/addQuote", async (req, res) => {
-  const { quote, author, apiKey } = req.body;
+  const { quote, author, authorId, apiKey } = req.body;
 
   try {
     // Fetch the user based on the provided apiKey
@@ -68,6 +68,9 @@ app.post("/addQuote", async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+    if (user.id !== authorId) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
     const newQuote = await addQuote(quote, author, user.id);
     res.status(200).json({ newQuote });
@@ -75,6 +78,7 @@ app.post("/addQuote", async (req, res) => {
     res.status(500).json({ error: "Failed to add quote" });
   }
 });
+
 async function deleteQuote(quoteId: number, apiKey: string) {
   // Retrieve the quote to check the associated authorId
   const quote = await prisma.quote.findUnique({

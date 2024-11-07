@@ -12,7 +12,7 @@ const corsOptions = {
   ],
 }; // Define CORS options, restricting access to your server from only this specific origin
 
-export const app = express();
+const app = express();
 export const prisma = new PrismaClient();
 
 app.use(express.json()); // Middleware to parse JSON bodies

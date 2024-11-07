@@ -1,5 +1,5 @@
-import { app, prisma } from "../..";
-import { Request, Response } from "express";
+import { prisma } from "../..";
+import { Router, Request, Response } from "express";
 
 import {
   getRandomQuote,
@@ -8,15 +8,17 @@ import {
   deleteQuote,
 } from "../helpers/quotesHelper";
 
-app.get("/randomQuote", async (req: Request, res: Response) => {
+const quotesRouter = Router();
+
+quotesRouter.get("/randomQuote", async (req: Request, res: Response) => {
   res.json(await getRandomQuote());
 });
 
-app.get("/getUserQuotes", async (req: Request, res: Response) => {
+quotesRouter.get("/getUserQuotes", async (req: Request, res: Response) => {
   res.json(await getUserQuotes());
 });
 
-app.post("/addQuote", async (req, res) => {
+quotesRouter.post("/addQuote", async (req, res) => {
   const { quote, author, authorId, apiKey } = req.body;
 
   try {
@@ -39,7 +41,7 @@ app.post("/addQuote", async (req, res) => {
   }
 });
 
-app.delete("/deleteQuote", async (req: Request, res: Response) => {
+quotesRouter.delete("/deleteQuote", async (req: Request, res: Response) => {
   await deleteQuote(req.body.id, req.body.apiKey);
   const updatedUserQuotes = await getUserQuotes();
 
@@ -48,3 +50,5 @@ app.delete("/deleteQuote", async (req: Request, res: Response) => {
     quotes: updatedUserQuotes,
   });
 });
+
+export default quotesRouter;

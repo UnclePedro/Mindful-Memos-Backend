@@ -1,8 +1,10 @@
-import { app } from "../..";
-import { Request, Response } from "express";
+import { Router, Request, Response } from "express";
 import { newUser } from "../helpers/userHelper";
+import { User } from "@prisma/client";
 
-app.post("/generateUser", async (req: Request, res: Response) => {
+const userRouter = Router();
+
+userRouter.post("/generateUser", async (req: Request, res: Response) => {
   try {
     const newUserData: User = await newUser(); // Create a new user with an API key
     res.status(201).json({
@@ -13,3 +15,5 @@ app.post("/generateUser", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to create user: backend" });
   }
 });
+
+export default userRouter;

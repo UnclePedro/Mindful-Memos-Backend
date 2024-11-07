@@ -1,7 +1,8 @@
 import express, { Request, Response } from "express"; // Import express and the Request and Response types
 import cors from "cors"; // Import the CORS middleware, which allows your server to handle cross-origin requests. Server updates changes without reboot
 import { PrismaClient } from "@prisma/client";
-import { getRandomQuote, getUserQuotes } from "./api/helpers/quotesHelper";
+import quotesRouter from "./api/routes/quotes";
+import userRouter from "./api/routes/user";
 
 const corsOptions = {
   origin: [
@@ -18,8 +19,8 @@ app.use(express.json()); // Middleware to parse JSON bodies
 app.use(cors(corsOptions)); // Apply CORS middleware with the specified options to the Express app
 
 // Define your routes
-app.get("/randomQuote", getRandomQuote);
-app.get("/getUserQuotes", getUserQuotes);
+app.use("/", quotesRouter);
+app.use("/", userRouter);
 
 app.listen(8080, () => {
   console.log("Server is running.");

@@ -1,4 +1,3 @@
-import { prisma } from "..";
 import { Router, Request, Response } from "express";
 
 import {
@@ -7,7 +6,9 @@ import {
   addQuote,
   deleteQuote,
 } from "../helpers/quotesHelper";
+import { PrismaClient } from "@prisma/client";
 
+const prisma = new PrismaClient();
 export const quotesRouter = Router();
 
 quotesRouter.get("/randomQuote", async (req: Request, res: Response) => {

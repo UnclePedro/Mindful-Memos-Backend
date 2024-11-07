@@ -1,4 +1,6 @@
-import { prisma } from "..";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export const getRandomQuote = async () => {
   const allQuotes = await prisma.quote.findMany();

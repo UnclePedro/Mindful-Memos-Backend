@@ -8,7 +8,7 @@ import {
   deleteQuote,
 } from "../helpers/quotesHelper";
 
-const quotesRouter = Router();
+export const quotesRouter = Router();
 
 quotesRouter.get("/randomQuote", async (req: Request, res: Response) => {
   res.json(await getRandomQuote());
@@ -50,5 +50,3 @@ quotesRouter.delete("/deleteQuote", async (req: Request, res: Response) => {
     quotes: updatedUserQuotes,
   });
 });
-
-export default quotesRouter;

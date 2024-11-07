@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { newUser } from "../helpers/userHelper";
 import { User } from "@prisma/client";
 
-const userRouter = Router();
+export const userRouter = Router();
 
 userRouter.post("/generateUser", async (req: Request, res: Response) => {
   try {
@@ -15,5 +15,3 @@ userRouter.post("/generateUser", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to create user: backend" });
   }
 });
-
-export default userRouter;

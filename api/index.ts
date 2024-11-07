@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express"; // Import express and the Request and Response types
 import cors from "cors"; // Import the CORS middleware, which allows your server to handle cross-origin requests. Server updates changes without reboot
 import { PrismaClient } from "@prisma/client";
-import quotesRouter from "./api/routes/quotes";
-import userRouter from "./api/routes/user";
+import quotesRouter from "./routes/quotes";
+import userRouter from "./routes/user";
 
 const corsOptions = {
   origin: [

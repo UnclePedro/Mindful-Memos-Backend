@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { prisma } from "../..";
+import { prisma } from "..";
 import { User } from "@prisma/client";
 
 export const newUser = async () => {

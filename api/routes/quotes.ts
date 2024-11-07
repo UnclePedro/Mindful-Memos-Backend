@@ -1,4 +1,4 @@
-import { prisma } from "../..";
+import { prisma } from "..";
 import { Router, Request, Response } from "express";
 
 import {

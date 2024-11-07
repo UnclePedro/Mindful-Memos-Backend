@@ -1,4 +1,4 @@
-import { prisma } from "../..";
+import { prisma } from "..";
 
 export const getRandomQuote = async () => {
   const allQuotes = await prisma.quote.findMany();

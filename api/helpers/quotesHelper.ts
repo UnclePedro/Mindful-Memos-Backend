@@ -1,6 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "./prismaClient";
 
 export const getRandomQuote = async () => {
   const allQuotes = await prisma.quote.findMany();
@@ -28,7 +26,7 @@ export async function addQuote(
       author,
       isUserQuote,
       user: {
-        connect: { id: authorId }, // Connect the quote to the user using their ID
+        connect: { id: authorId }, // Connect the quote to the user with the passed in authorId
       },
     },
   });
@@ -41,7 +39,6 @@ export async function deleteQuote(quoteId: number, apiKey: string) {
     select: { authorId: true }, // Select the authorId based on the quoteId
   });
 
-  // If the quote doesn't exist, throw an error
   if (!quote) {
     throw new Error("Quote not found");
   }
@@ -52,7 +49,6 @@ export async function deleteQuote(quoteId: number, apiKey: string) {
     select: { apiKey: true },
   });
 
-  // If the user doesn't exist or the apiKey does not match, throw an error
   if (!user) {
     throw new Error("User not found");
   }
@@ -73,14 +69,4 @@ export async function loadQuotes(quotes: []) {
     await addQuote(quote, author, 1, false); // Set isUserQuote to false for predefined quotes
   }
   console.log("Inspirational quotes loaded successfully!");
-}
-
-// Function to delete all quotes from the database
-export async function deleteAllQuotes() {
-  try {
-    const deletedQuotes = await prisma.quote.deleteMany({});
-    console.log(`Deleted ${deletedQuotes.count} quotes from the database.`);
-  } catch (error) {
-    console.error("Error deleting quotes:", error);
-  }
 }

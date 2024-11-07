@@ -1,8 +1,6 @@
 import crypto from "crypto";
 import { User } from "@prisma/client";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "./prismaClient";
 
 export const newUser = async () => {
   const apiKey = crypto.randomBytes(5).toString("hex");

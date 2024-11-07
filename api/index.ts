@@ -1,5 +1,5 @@
-import express from "express"; // Import express and the Request and Response types
-import cors from "cors"; // Import the CORS middleware, which allows your server to handle cross-origin requests. Server updates changes without reboot
+import express from "express";
+import cors from "cors"; // Import the CORS middleware, which allows your server to handle cross-origin requests & server updates changes without reboot
 import { userRouter } from "./routes/user";
 import { quotesRouter } from "./routes/quotes";
 

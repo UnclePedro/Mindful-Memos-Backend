@@ -4,19 +4,11 @@ import { PrismaClient } from "@prisma/client";
 import quotesRouter from "./routes/quotes";
 import userRouter from "./routes/user";
 
-const corsOptions = {
-  origin: [
-    "http://localhost:5173",
-    "https://random-quote-generator-api.vercel.app",
-    "https://mindful-memos.peterforsyth.dev",
-  ],
-}; // Define CORS options, restricting access to your server from only this specific origin
-
 export const app = express();
 export const prisma = new PrismaClient();
 
 app.use(express.json()); // Middleware to parse JSON bodies
-app.use(cors(corsOptions)); // Apply CORS middleware with the specified options to the Express app
+app.use(cors);
 
 // Define your routes
 app.use("/", quotesRouter);

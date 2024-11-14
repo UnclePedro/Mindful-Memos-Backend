@@ -1,6 +1,6 @@
 # Mindful Memos Backend
 
-A custom backend solution for my Mindful Memos app. Custom API's that query a PostgreSQL database with the help of Prisma.
+This is the backend solution for my [Mindful Memos](https://github.com/UnclePedro/Mindful-Memos) app. It consists of custom APIs that query a PostgreSQL database with the help of Prisma.
 
 ## Developed Using
 - [TypeScript](https://www.typescriptlang.org/)

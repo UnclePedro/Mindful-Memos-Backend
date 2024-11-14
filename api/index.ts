@@ -9,14 +9,13 @@ const corsOptions = {
     "https://random-quote-generator-api.vercel.app",
     "https://mindful-memos.peterforsyth.dev",
   ],
-}; // Define CORS options, restricting access to your server from only this specific origin
+};
 
 const app = express();
 
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(cors(corsOptions)); // Apply CORS middleware with the specified options to the Express app
 
-// Define your routes
 app.use("/", quotesRouter);
 app.use("/", userRouter);
 

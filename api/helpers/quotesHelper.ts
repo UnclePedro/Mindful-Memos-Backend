@@ -43,6 +43,7 @@ export async function deleteQuote(quoteId: number, apiKey: string) {
     throw new Error("Quote not found");
   }
 
+  // Need to create userValidation function instead
   // Retrieve the user to check the apiKey
   const user = await prisma.user.findUnique({
     where: { id: quote.authorId },

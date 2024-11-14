@@ -22,6 +22,8 @@ quotesRouter.post("/addQuote", async (req, res) => {
   const { quote, author, authorId, apiKey } = req.body;
 
   try {
+    // Need to create user validation function instead of doing it on the route
+
     // Fetch the user based on the provided apiKey
     const user = await prisma.user.findUnique({
       where: { apiKey },

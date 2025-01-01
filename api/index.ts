@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors"; // Import the CORS middleware, which allows your server to handle cross-origin requests & server updates changes without reboot
 import { userRouter } from "./routes/user";
 import { quotesRouter } from "./routes/quotes";
+import { authRouter } from "./routes/authorisation";
 
 const corsOptions = {
   origin: [
@@ -18,6 +19,7 @@ app.use(cors(corsOptions)); // Apply CORS middleware with the specified options 
 
 app.use("/", quotesRouter);
 app.use("/", userRouter);
+app.use("/", authRouter);
 
 app.listen(8080, () => {
   console.log("Server is running.");

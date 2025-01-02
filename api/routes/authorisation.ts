@@ -8,7 +8,6 @@ const workos = new WorkOS(process.env.WORKOS_API_KEY, {
 });
 
 authRouter.get("/login", (req, res) => {
-  console.log(process.env.WORKOS_CLIENT_ID);
   const authorizationUrl = workos.userManagement.getAuthorizationUrl({
     // Specify that we'd like AuthKit to handle the authentication flow
     provider: "authkit",
@@ -18,28 +17,57 @@ authRouter.get("/login", (req, res) => {
     clientId: process.env.WORKOS_CLIENT_ID as string,
   });
 
-  console.log(authorizationUrl);
-
   // Redirect the user to the AuthKit sign-in page
   res.redirect(authorizationUrl);
 });
 
-// authRouter.get("/callback", async (req, res) => {
-//   // The authorization code returned by AuthKit
-//   const code = req.query.code;
+authRouter.get("/callback", async (req, res) => {
+  // The authorization code returned by AuthKit
+  const code = req.query.code as string;
 
-//   if (!code) {
-//     return res.status(400).send("No code provided");
-//   }
+  if (!code) {
+    return res.status(400).send("No code provided");
+  }
 
-//   const { user } = await workos.userManagement.authenticateWithCode({
-//     code,
-//     clientId: process.env.WORKOS_CLIENT_ID as string,
-//   });
+  try {
+    const authenticateResponse =
+      await workos.userManagement.authenticateWithCode({
+        clientId: process.env.WORKOS_CLIENT_ID as string,
+        code,
+        session: {
+          sealSession: true,
+          cookiePassword: process.env.WORKOS_COOKIE_PASSWORD,
+        },
+      });
 
-//   // Use the information in `user` for further business logic.
+    const { user, sealedSession } = authenticateResponse;
 
-//   // Redirect the user to the homepage
-//   res.redirect("/");
-//   return user;
-// });
+    // Store the session in a cookie
+    res.cookie("wos-session", sealedSession, {
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+    });
+
+    // Use the information in `user` for further business logic.
+
+    // Redirect the user to the homepage
+    return res.redirect("http://localhost:5173");
+  } catch (error) {
+    return res.redirect("http://localhost:8080/login");
+  }
+});
+
+authRouter.get("/logout", async (req: Request, res: Response) => {
+  console.log("Cookies received in /logout:", req.cookies);
+  const session = workos.userManagement.loadSealedSession({
+    sessionData: req.cookies["wos-session"], // ERROR
+    cookiePassword: process.env.WORKOS_COOKIE_PASSWORD as string,
+  });
+
+  const url = await session.getLogoutUrl();
+
+  res.clearCookie("wos-session");
+  res.redirect(url);
+});

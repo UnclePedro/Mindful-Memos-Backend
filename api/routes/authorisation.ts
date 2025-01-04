@@ -1,7 +1,9 @@
 import { WorkOS } from "@workos-inc/node";
 import { Router, Request, Response } from "express";
+import cookieParser from "cookie-parser";
 
 export const authRouter = Router();
+authRouter.use(cookieParser());
 
 const workos = new WorkOS(process.env.WORKOS_API_KEY, {
   clientId: process.env.WORKOS_CLIENT_ID,
@@ -21,6 +23,7 @@ authRouter.get("/login", (req, res) => {
   res.redirect(authorizationUrl);
 });
 
+// Triggered after /login redirects
 authRouter.get("/callback", async (req, res) => {
   // The authorization code returned by AuthKit
   const code = req.query.code as string;
@@ -49,20 +52,17 @@ authRouter.get("/callback", async (req, res) => {
       secure: true,
       sameSite: "lax",
     });
-
-    // Use the information in `user` for further business logic.
-
-    // Redirect the user to the homepage
-    return res.redirect("http://localhost:5173");
+    console.log(user);
+    res.redirect("http://localhost:5173");
+    return user;
   } catch (error) {
     return res.redirect("http://localhost:8080/login");
   }
 });
 
 authRouter.get("/logout", async (req: Request, res: Response) => {
-  console.log("Cookies received in /logout:", req.cookies);
   const session = workos.userManagement.loadSealedSession({
-    sessionData: req.cookies["wos-session"], // ERROR
+    sessionData: req.cookies["wos-session"],
     cookiePassword: process.env.WORKOS_COOKIE_PASSWORD as string,
   });
 

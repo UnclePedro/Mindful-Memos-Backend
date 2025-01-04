@@ -18,8 +18,8 @@ datasource db {
 }
 
 model User {
-  id              Int       @id @default(autoincrement())
-  apiKey          String    @unique
+  name            String  
+  id              String    @unique @id
   Quote           Quote[]
 }
 
@@ -27,7 +27,7 @@ model Quote {
   id              Int       @id @default(autoincrement())
   quote           String
   author          String    @default("Unknown")
-  authorId        Int       // Foreign key to the User model
+  authorId        String    // Foreign key to the User model
   user            User      @relation(fields: [authorId], references: [id]) // Relation to User
   isUserQuote     Boolean   @default(true)
 }

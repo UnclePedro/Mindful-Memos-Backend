@@ -1,14 +1,20 @@
 import { Router, Request, Response } from "express";
-
 import {
   getRandomQuote,
   getUserQuotes,
   addQuote,
-  deleteQuote,
+  // deleteQuote,
 } from "../helpers/quotesHelper";
 import { prisma } from "../helpers/prismaClient";
+import { WorkOS } from "@workos-inc/node";
+import cookieParser from "cookie-parser";
+
+const workos = new WorkOS(process.env.WORKOS_API_KEY, {
+  clientId: process.env.WORKOS_CLIENT_ID as string,
+});
 
 export const quotesRouter = Router();
+quotesRouter.use(cookieParser());
 
 quotesRouter.get("/randomQuote", async (req: Request, res: Response) => {
   res.json(await getRandomQuote());
@@ -19,36 +25,36 @@ quotesRouter.get("/getUserQuotes", async (req: Request, res: Response) => {
 });
 
 quotesRouter.post("/addQuote", async (req, res) => {
-  const { quote, author, authorId, apiKey } = req.body;
-
   try {
-    // Need to create user validation function instead of doing it on the route
-
-    // Fetch the user based on the provided apiKey
-    const user = await prisma.user.findUnique({
-      where: { apiKey },
+    const session = workos.userManagement.loadSealedSession({
+      sessionData: req.cookies["wos-session"],
+      cookiePassword: process.env.WORKOS_COOKIE_PASSWORD as string,
     });
 
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-    if (user.id !== authorId) {
-      return res.status(404).json({ error: "User not found" });
-    }
+    const authResponse = await session.authenticate();
 
+    // Check if the response indicates successful authentication
+    if (!authResponse.authenticated) {
+      console.log("authresponse.authenticated failed");
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const user = authResponse.user;
+
+    const { quote, author } = req.body;
     const newQuote = await addQuote(quote, author, user.id);
     res.status(200).json({ newQuote });
   } catch (error) {
-    res.status(500).json({ error: "Failed to add quote" });
+    console.error("Failed to authenticate or process request:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-quotesRouter.delete("/deleteQuote", async (req: Request, res: Response) => {
-  await deleteQuote(req.body.id, req.body.apiKey);
-  const updatedUserQuotes = await getUserQuotes();
+// quotesRouter.delete("/deleteQuote", async (req: Request, res: Response) => {
+//   await deleteQuote(req.body.id, req.body.apiKey);
+//   const updatedUserQuotes = await getUserQuotes();
 
-  res.status(200).json({
-    message: "Quote deleted successfully",
-    quotes: updatedUserQuotes,
-  });
-});
+//   res.status(200).json({
+//     message: "Quote deleted successfully",
+//     quotes: updatedUserQuotes,
+//   });
+// });

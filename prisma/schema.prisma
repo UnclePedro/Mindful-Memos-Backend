@@ -19,7 +19,8 @@ datasource db {
 
 model User {
   name            String  
-  id              String    @unique @id
+  authKey         String    @unique
+  id              String    @id @default(uuid())
   Quote           Quote[]
 }
 

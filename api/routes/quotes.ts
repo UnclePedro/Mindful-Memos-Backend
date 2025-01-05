@@ -26,6 +26,7 @@ quotesRouter.get("/getUserQuotes", async (req: Request, res: Response) => {
 
 quotesRouter.post("/addQuote", async (req, res) => {
   try {
+    // Session and user auth needs to be abstracted into helper function
     const session = workos.userManagement.loadSealedSession({
       sessionData: req.cookies["wos-session"],
       cookiePassword: process.env.WORKOS_COOKIE_PASSWORD as string,
@@ -38,7 +39,15 @@ quotesRouter.post("/addQuote", async (req, res) => {
       console.log("authresponse.authenticated failed");
       return res.status(401).json({ error: "Unauthorized" });
     }
-    const user = authResponse.user;
+    const user = await prisma.user.findUnique({
+      where: {
+        authKey: authResponse.user.id,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
     const { quote, author } = req.body;
     const newQuote = await addQuote(quote, author, user.id);

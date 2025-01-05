@@ -20,18 +20,18 @@ export async function addQuote(
   authorId: string,
   isUserQuote: boolean = true
 ) {
-  await prisma.quote.create({
+  const newQuote = await prisma.quote.create({
     data: {
       quote,
       author,
       isUserQuote,
       user: {
-        connect: { id: authorId }, // Connect the quote to the user with the passed in authorId
+        connect: { id: authorId },
       },
     },
   });
+  return newQuote;
 }
-
 // export async function deleteQuote(quoteId: number, apiKey: string) {
 //   // Retrieve the quote to check the associated authorId
 //   const quote = await prisma.quote.findUnique({
@@ -65,9 +65,9 @@ export async function addQuote(
 //   });
 // }
 
-// export async function loadQuotes(quotes: []) {
-//   for (const { quote, author } of quotes) {
-//     await addQuote(quote, author, 1, false); // Set isUserQuote to false for predefined quotes
-//   }
-//   console.log("Inspirational quotes loaded successfully!");
-// }
+export async function loadQuotes(quotes: { quote: string; author: string }[]) {
+  for (const { quote, author } of quotes) {
+    await addQuote(quote, author, "1", false); // Set isUserQuote to false for predefined quotes
+  }
+  console.log("Inspirational quotes loaded successfully!");
+}

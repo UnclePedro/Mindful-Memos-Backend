@@ -14,10 +14,10 @@ import { prisma } from "./prismaClient";
 //   return newUser;
 // };
 
-export const handleUserLogin = async (name: string, id: string) => {
+export const saveUser = async (name: string, authKey: string) => {
   try {
     const existingUser = await prisma.user.findUnique({
-      where: { id },
+      where: { authKey },
     });
 
     if (existingUser) {
@@ -27,7 +27,7 @@ export const handleUserLogin = async (name: string, id: string) => {
     const newUser = await prisma.user.create({
       data: {
         name,
-        id,
+        authKey,
       },
     });
 

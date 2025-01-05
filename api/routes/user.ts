@@ -1,7 +1,7 @@
 import { WorkOS } from "@workos-inc/node";
 import { Router, Request, Response } from "express";
 import cookieParser from "cookie-parser";
-import { handleUserLogin as saveUser } from "../helpers/userHelper";
+import { saveUser } from "../helpers/userHelper";
 
 const workos = new WorkOS(process.env.WORKOS_API_KEY, {
   clientId: process.env.WORKOS_CLIENT_ID,
@@ -45,7 +45,7 @@ userRouter.get("/callback", async (req, res) => {
       });
 
     const { user, sealedSession } = authenticateResponse;
-    saveUser(`${user.firstName} ${user.lastName}`, user.id); // Saves user to database
+    saveUser(`${user.firstName} ${user.lastName}`, user.id); // Saves new user to database
 
     // Store the session in a cookie
     res.cookie("wos-session", sealedSession, {

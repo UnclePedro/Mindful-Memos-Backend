@@ -1,7 +1,7 @@
 import { WorkOS } from "@workos-inc/node";
 import { Router, Request, Response } from "express";
 import cookieParser from "cookie-parser";
-import { saveUser } from "../helpers/userHelper";
+import { saveUser, validateUserSession } from "../helpers/userHelper";
 import { prisma } from "../helpers/prismaClient";
 
 const workos = new WorkOS(process.env.WORKOS_API_KEY, {
@@ -79,31 +79,9 @@ userRouter.get("/logout", async (req: Request, res: Response) => {
 
 userRouter.get("/validate-session", async (req, res) => {
   try {
-    const session = workos.userManagement.loadSealedSession({
-      sessionData: req.cookies["wos-session"],
-      cookiePassword: process.env.WORKOS_COOKIE_PASSWORD as string,
-    });
-
-    const authResponse = await session.authenticate();
-
-    // Check if the response indicates successful authentication
-    if (!authResponse.authenticated) {
-      console.log("authresponse.authenticated failed");
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-    const user = await prisma.user.findUnique({
-      where: {
-        authKey: authResponse.user.id,
-      },
-    });
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-
-    return res.status(200).json(user.id);
+    const user = await validateUserSession(req, res);
+    return res.status(200).json(user);
   } catch (error) {
     console.error("Session validation failed:", error);
-    res.status(500).json({ error: "Internal Server Error" });
   }
 });

@@ -1,6 +1,12 @@
 import crypto from "crypto";
 import { User } from "@prisma/client";
 import { prisma } from "./prismaClient";
+import { WorkOS } from "@workos-inc/node";
+import { Request, Response } from "express";
+
+const workos = new WorkOS(process.env.WORKOS_API_KEY, {
+  clientId: process.env.WORKOS_CLIENT_ID,
+});
 
 // export const newUser = async () => {
 //   const apiKey = crypto.randomBytes(5).toString("hex");
@@ -35,4 +41,30 @@ export const saveUser = async (name: string, authKey: string) => {
   } catch (error) {
     throw error;
   }
+};
+
+export const validateUserSession = async (req: Request, res: Response) => {
+  const session = workos.userManagement.loadSealedSession({
+    sessionData: req.cookies["wos-session"],
+    cookiePassword: process.env.WORKOS_COOKIE_PASSWORD as string,
+  });
+
+  const authResponse = await session.authenticate();
+
+  // Check if the response indicates successful authentication
+  if (!authResponse.authenticated) {
+    console.log("authresponse.authenticated failed");
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  const user = await prisma.user.findUnique({
+    where: {
+      authKey: authResponse.user.id,
+    },
+  });
+
+  if (!user) {
+    return res.status(404).json({ error: "User not found" });
+  }
+
+  return user.id;
 };

@@ -41,7 +41,7 @@ quotesRouter.post("/addQuote", async (req, res) => {
     }
     const user = await prisma.user.findUnique({
       where: {
-        authKey: authResponse.user.id,
+        id: authResponse.user.id,
       },
     });
 

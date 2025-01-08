@@ -8,22 +8,14 @@ const workos = new WorkOS(process.env.WORKOS_API_KEY, {
   clientId: process.env.WORKOS_CLIENT_ID,
 });
 
-// export const newUser = async () => {
-//   const apiKey = crypto.randomBytes(5).toString("hex");
-
-//   const newUser: User = await prisma.user.create({
-//     data: {
-//       id: apiKey,
-//     },
-//   });
-
-//   return newUser;
-// };
-
-export const saveUser = async (name: string, authKey: string) => {
+export const saveUser = async (
+  name: string,
+  id: string,
+  profilePictureUrl: string | null
+) => {
   try {
     const existingUser = await prisma.user.findUnique({
-      where: { authKey },
+      where: { id },
     });
 
     if (existingUser) {
@@ -33,7 +25,8 @@ export const saveUser = async (name: string, authKey: string) => {
     const newUser = await prisma.user.create({
       data: {
         name,
-        authKey,
+        id,
+        profilePictureUrl,
       },
     });
 

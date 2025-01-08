@@ -48,7 +48,8 @@ userRouter.get("/callback", async (req, res) => {
     const { sealedSession } = authenticateResponse;
     const user = await saveUser(
       `${authenticateResponse.user.firstName} ${authenticateResponse.user.lastName}`,
-      authenticateResponse.user.id
+      authenticateResponse.user.id,
+      authenticateResponse.user.profilePictureUrl
     ); // Saves new user to database
 
     console.log(authenticateResponse);

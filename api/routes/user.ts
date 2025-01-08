@@ -1,7 +1,7 @@
 import { WorkOS } from "@workos-inc/node";
 import { Router, Request, Response } from "express";
 import cookieParser from "cookie-parser";
-import { saveUser, validateUserSession } from "../helpers/userHelper";
+import { saveUser, validateSession } from "../helpers/userHelper";
 import { prisma } from "../helpers/prismaClient";
 
 const workos = new WorkOS(process.env.WORKOS_API_KEY, {
@@ -46,15 +46,17 @@ userRouter.get("/callback", async (req, res) => {
       });
 
     const { sealedSession } = authenticateResponse;
-    await saveUser(
+    const user = await saveUser(
       `${authenticateResponse.user.firstName} ${authenticateResponse.user.lastName}`,
       authenticateResponse.user.id
     ); // Saves new user to database
 
+    console.log(authenticateResponse);
+
     // Store the session in a cookie
     res.cookie("wos-session", sealedSession, {
       path: "/",
-      httpOnly: true,
+      httpOnly: false,
       secure: true,
       sameSite: "none",
     });
@@ -79,7 +81,7 @@ userRouter.get("/logout", async (req: Request, res: Response) => {
 
 userRouter.get("/validate-session", async (req, res) => {
   try {
-    const user = await validateUserSession(req, res);
+    const user = await validateSession(req, res);
     return res.status(200).json(user);
   } catch (error) {
     console.error("Session validation failed:", error);

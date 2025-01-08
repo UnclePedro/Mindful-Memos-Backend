@@ -43,7 +43,7 @@ export const saveUser = async (name: string, authKey: string) => {
   }
 };
 
-export const validateUserSession = async (req: Request, res: Response) => {
+export const validateSession = async (req: Request, res: Response) => {
   const session = workos.userManagement.loadSealedSession({
     sessionData: req.cookies["wos-session"],
     cookiePassword: process.env.WORKOS_COOKIE_PASSWORD as string,
@@ -51,20 +51,9 @@ export const validateUserSession = async (req: Request, res: Response) => {
 
   const authResponse = await session.authenticate();
 
-  // Check if the response indicates successful authentication
   if (!authResponse.authenticated) {
     console.log("authresponse.authenticated failed");
     return res.status(401).json({ error: "Unauthorized" });
   }
-  const user = await prisma.user.findUnique({
-    where: {
-      authKey: authResponse.user.id,
-    },
-  });
-
-  if (!user) {
-    return res.status(404).json({ error: "User not found" });
-  }
-
-  return user.id;
+  return authResponse.user;
 };

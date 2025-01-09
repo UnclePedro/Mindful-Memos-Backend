@@ -82,7 +82,10 @@ userRouter.get("/logout", async (req: Request, res: Response) => {
 
   const url = await session.getLogoutUrl();
 
-  res.clearCookie("wos-session");
+  res.clearCookie("wos-session", {
+    domain: ".mindful-memos.peterforsyth.dev",
+    path: "/",
+  });
   res.redirect(url);
 });
 

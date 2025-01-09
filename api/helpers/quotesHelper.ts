@@ -11,6 +11,13 @@ export const getUserQuotes = async () => {
     where: {
       isUserQuote: true,
     },
+    include: {
+      user: {
+        select: {
+          profilePictureUrl: true, // Only fetch the profile picture URL
+        },
+      },
+    },
   });
 };
 

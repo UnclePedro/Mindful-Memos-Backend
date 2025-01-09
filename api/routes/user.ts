@@ -2,14 +2,11 @@ import { WorkOS } from "@workos-inc/node";
 import { Router, Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import { refreshSession, saveUser, validateUser } from "../helpers/userHelper";
-
-// https://api.mindful-memos.peterforsyth.dev
-// http://localhost:8080
-const backendUrl = "https://api.mindful-memos.peterforsyth.dev";
-
-// https://mindful-memos.peterforsyth.dev
-// http://localhost:5173
-const frontendUrl = "https://mindful-memos.peterforsyth.dev";
+import {
+  frontendUrl,
+  backendUrl,
+  cookiesDomian,
+} from "../config/endpointConfig";
 
 const workos = new WorkOS(process.env.WORKOS_API_KEY, {
   clientId: process.env.WORKOS_CLIENT_ID,
@@ -61,7 +58,7 @@ userRouter.get("/callback", async (req, res) => {
 
     // Store the session in a cookie
     res.cookie("wos-session", sealedSession, {
-      domain: ".mindful-memos.peterforsyth.dev",
+      domain: cookiesDomian,
       path: "/",
       httpOnly: false,
       secure: true,

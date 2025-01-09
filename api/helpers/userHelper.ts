@@ -3,6 +3,7 @@ import { User } from "@prisma/client";
 import { prisma } from "./prismaClient";
 import { WorkOS } from "@workos-inc/node";
 import { Request, Response } from "express";
+import { cookiesDomian } from "../config/endpointConfig";
 
 const workos = new WorkOS(process.env.WORKOS_API_KEY, {
   clientId: process.env.WORKOS_CLIENT_ID,
@@ -70,7 +71,7 @@ export const refreshSession = async (
 
     // update the cookie
     res.cookie("wos-session", authResponse.sealedSession, {
-      domain: ".mindful-memos.peterforsyth.dev",
+      domain: cookiesDomian,
       path: "/",
       httpOnly: false,
       secure: true,

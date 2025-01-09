@@ -36,8 +36,8 @@ quotesRouter.delete(
   async (req: Request, res: Response) => {
     try {
       await validateUser(req, res);
-      const { quoteId } = req.params;
 
+      const { quoteId } = req.params;
       await deleteQuote(parseInt(quoteId, 10));
       const updatedUserQuotes = await getUserQuotes();
       res.status(200).json({

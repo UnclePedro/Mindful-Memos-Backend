@@ -70,6 +70,7 @@ export const refreshSession = async (
 
     // update the cookie
     res.cookie("wos-session", authResponse.sealedSession, {
+      domain: ".mindful-memos.peterforsyth.dev",
       path: "/",
       httpOnly: false,
       secure: true,

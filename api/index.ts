@@ -6,7 +6,7 @@ import { userRouter } from "./routes/user";
 const corsOptions = {
   origin: [
     "http://localhost:5173",
-    "https://random-quote-generator-api.vercel.app",
+    "https://api.mindful-memos.peterforsyth.dev",
     "https://mindful-memos.peterforsyth.dev",
   ],
   credentials: true,

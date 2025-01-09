@@ -1,8 +1,15 @@
 import { WorkOS } from "@workos-inc/node";
 import { Router, Request, Response } from "express";
 import cookieParser from "cookie-parser";
-import { saveUser, validateSession } from "../helpers/userHelper";
-import { prisma } from "../helpers/prismaClient";
+import { refreshSession, saveUser, validateUser } from "../helpers/userHelper";
+
+// https://api.mindful-memos.peterforsyth.dev
+// http://localhost:8080
+const backendUrl = "http://localhost:8080";
+
+// https://mindful-memos.peterforsyth.dev
+// http://localhost:5173
+const frontendUrl = "http://localhost:5173";
 
 const workos = new WorkOS(process.env.WORKOS_API_KEY, {
   clientId: process.env.WORKOS_CLIENT_ID,
@@ -17,7 +24,7 @@ userRouter.get("/login", (req, res) => {
     provider: "authkit",
 
     // The callback endpoint that WorkOS will redirect to after a user authenticates
-    redirectUri: "http://localhost:8080/callback",
+    redirectUri: `${backendUrl}/callback`,
     clientId: process.env.WORKOS_CLIENT_ID as string,
   });
 
@@ -46,13 +53,11 @@ userRouter.get("/callback", async (req, res) => {
       });
 
     const { sealedSession } = authenticateResponse;
-    const user = await saveUser(
+    await saveUser(
       `${authenticateResponse.user.firstName} ${authenticateResponse.user.lastName}`,
       authenticateResponse.user.id,
       authenticateResponse.user.profilePictureUrl
     ); // Saves new user to database
-
-    console.log(authenticateResponse);
 
     // Store the session in a cookie
     res.cookie("wos-session", sealedSession, {
@@ -62,9 +67,9 @@ userRouter.get("/callback", async (req, res) => {
       sameSite: "none",
     });
 
-    res.redirect("http://localhost:5173");
+    res.redirect(frontendUrl);
   } catch (error) {
-    return res.redirect("http://localhost:8080/login");
+    return res.redirect(`${backendUrl}/login`);
   }
 });
 
@@ -80,11 +85,17 @@ userRouter.get("/logout", async (req: Request, res: Response) => {
   res.redirect(url);
 });
 
-userRouter.get("/validate-session", async (req, res) => {
-  try {
-    const user = await validateSession(req, res);
-    return res.status(200).json(user);
-  } catch (error) {
-    console.error("Session validation failed:", error);
+userRouter.get("/validateSession", refreshSession, async (req, res) => {
+  const session = workos.userManagement.loadSealedSession({
+    sessionData: req.cookies["wos-session"],
+    cookiePassword: process.env.WORKOS_COOKIE_PASSWORD as string,
+  });
+
+  const authResponse = await session.authenticate();
+
+  if (!authResponse.authenticated) {
+    console.log("authresponse.authenticated failed");
+    return res.status(401).json({ error: "Unauthorized" });
   }
+  return res.status(200).json(authResponse.user);
 });

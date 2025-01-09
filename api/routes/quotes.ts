@@ -24,11 +24,10 @@ quotesRouter.post("/addQuote", async (req, res) => {
     const user = await validateUser(req, res);
 
     const { quote, author } = req.body;
-    const newQuote = await addQuote(quote, author, user.id);
+    const updatedUserQuotes = await addQuote(quote, author, user.id);
 
     res.status(200).json({
-      ...newQuote,
-      profilePictureUrl: user.profilePictureUrl,
+      updatedUserQuotes,
     });
   } catch (error) {
     console.error("Failed to authenticate or process request:", error);

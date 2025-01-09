@@ -14,7 +14,7 @@ export const getUserQuotes = async () => {
     include: {
       user: {
         select: {
-          profilePictureUrl: true, // Only fetch the profile picture URL
+          profilePictureUrl: true, // add profilePictureUrl to quote object
         },
       },
     },
@@ -27,7 +27,7 @@ export const addQuote = async (
   userId: string,
   isUserQuote: boolean = true
 ) => {
-  const newQuote = await prisma.quote.create({
+  await prisma.quote.create({
     data: {
       quote,
       author,
@@ -37,7 +37,7 @@ export const addQuote = async (
       },
     },
   });
-  return newQuote;
+  return await getUserQuotes();
 };
 
 export const deleteQuote = async (quoteId: number) => {

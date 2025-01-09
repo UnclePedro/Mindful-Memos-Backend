@@ -1,14 +1,15 @@
 import express from "express";
 import cors from "cors"; // Import the CORS middleware, which allows your server to handle cross-origin requests & server updates changes without reboot
-import { userRouter } from "./routes/user";
 import { quotesRouter } from "./routes/quotes";
+import { userRouter } from "./routes/user";
 
 const corsOptions = {
   origin: [
     "http://localhost:5173",
-    "https://random-quote-generator-api.vercel.app",
+    "https://api.mindful-memos.peterforsyth.dev",
     "https://mindful-memos.peterforsyth.dev",
   ],
+  credentials: true,
 };
 
 const app = express();

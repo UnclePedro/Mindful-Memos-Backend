@@ -87,18 +87,46 @@ export const refreshSession = async (
   }
 };
 
-// Used to validate a user before making database actions
 export const validateUser = async (req: Request, res: Response) => {
   const session = workos.userManagement.loadSealedSession({
     sessionData: req.cookies["wos-session"],
     cookiePassword: process.env.WORKOS_COOKIE_PASSWORD as string,
   });
 
+  // Try authenticating the session
   const authResponse = await session.authenticate();
 
-  if (!authResponse.authenticated) {
-    throw new Error("Unauthorized user");
+  if (authResponse.authenticated) {
+    return authResponse.user;
   }
 
-  return authResponse.user;
+  // Redirect to login if no session cookie is provided
+  if (authResponse.reason === "no_session_cookie_provided") {
+    res.redirect("/login");
+    throw new Error("No session cookie provided");
+  }
+
+  // Attempt to refresh the session if session cookies exist
+  try {
+    const authResponse = await session.refresh();
+
+    if (!authResponse.authenticated || !authResponse.session) {
+      throw new Error("Session refresh failed");
+    }
+
+    // Update the cookie with the refreshed session
+    res.cookie("wos-session", authResponse.sealedSession, {
+      domain: cookiesDomian,
+      path: "/",
+      httpOnly: false,
+      secure: true,
+      sameSite: "none",
+    });
+
+    return authResponse.session.user;
+  } catch (error) {
+    res.clearCookie("wos-session");
+    res.redirect("/login");
+    throw new Error("Unauthorized user");
+  }
 };

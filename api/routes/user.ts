@@ -1,7 +1,7 @@
 import { WorkOS } from "@workos-inc/node";
 import { Router, Request, Response } from "express";
 import cookieParser from "cookie-parser";
-import { refreshSession, saveUser, validateUser } from "../helpers/userHelper";
+import { refreshSession, saveUser, getUser } from "../helpers/userHelper";
 import {
   frontendUrl,
   backendUrl,
@@ -86,17 +86,12 @@ userRouter.get("/logout", async (req: Request, res: Response) => {
   res.redirect(url);
 });
 
-userRouter.get("/validateSession", refreshSession, async (req, res) => {
-  const session = workos.userManagement.loadSealedSession({
-    sessionData: req.cookies["wos-session"],
-    cookiePassword: process.env.WORKOS_COOKIE_PASSWORD as string,
-  });
-
-  const authResponse = await session.authenticate();
-
-  if (!authResponse.authenticated) {
-    console.log("authresponse.authenticated failed");
-    return res.status(401).json({ error: "Unauthorized" });
+userRouter.get("/getUser", refreshSession, async (req, res) => {
+  try {
+    const user = await getUser(req);
+    return res.status(200).json(user);
+  } catch (error) {
+    console.error("Error getting user:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
-  return res.status(200).json(authResponse.user);
 });

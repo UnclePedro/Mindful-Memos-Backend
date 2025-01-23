@@ -6,7 +6,7 @@ import {
   deleteQuote,
 } from "../helpers/quotesHelper";
 import cookieParser from "cookie-parser";
-import { validateUser } from "../helpers/userHelper";
+import { getUser, refreshSession } from "../helpers/userHelper";
 
 export const quotesRouter = Router();
 quotesRouter.use(cookieParser());
@@ -19,9 +19,9 @@ quotesRouter.get("/getUserQuotes", async (req: Request, res: Response) => {
   res.json(await getUserQuotes());
 });
 
-quotesRouter.post("/addQuote", async (req, res) => {
+quotesRouter.post("/addQuote", refreshSession, async (req, res) => {
   try {
-    const user = await validateUser(req, res);
+    const user = await getUser(req);
 
     const { quote, author } = req.body;
     const updatedUserQuotes = await addQuote(quote, author, user.id);
@@ -37,9 +37,10 @@ quotesRouter.post("/addQuote", async (req, res) => {
 
 quotesRouter.delete(
   "/deleteQuote/:quoteId",
+  refreshSession,
   async (req: Request, res: Response) => {
     try {
-      await validateUser(req, res);
+      await getUser(req);
 
       const { quoteId } = req.params;
       await deleteQuote(parseInt(quoteId, 10));
